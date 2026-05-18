@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.npm
+
+# Environment files — NEVER commit these
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.env
+
+# Build outputs
+dist/
+.next/
+build/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Testing
+coverage/
+.nyc_output
+
+# TypeScript
+*.tsbuildinfo
+
+# NestJS
+apps/backend/dist/
+
+# Next.js
+apps/frontend/.next/
+apps/frontend/out/
+
+# Supabase local
+supabase/.branches
+supabase/.temp

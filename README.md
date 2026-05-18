@@ -18,7 +18,7 @@
 momentum/
 ├── apps/
 │   ├── backend/     # NestJS REST API (port 3001)
-│   └── frontend/    # Next.js App (port 3000)
+│   └── frontend/    # Next.js App (port 3002)
 ├── .gitignore
 ├── .prettierrc
 └── README.md
@@ -60,7 +60,7 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3002
 - Backend: http://localhost:3001/api
 
 ## Environment Variables

@@ -1,0 +1,47 @@
+import 'dotenv/config';
+import { DataSource } from 'typeorm';
+import {
+  User,
+  Exercise,
+  Workout,
+  WorkoutExercise,
+  WorkoutSet,
+  WorkoutTemplate,
+  TemplateExercise,
+  WeightLog,
+  BodyMeasurement,
+  Habit,
+  HabitLog,
+  Streak,
+  Achievement,
+  Reminder,
+  Notification,
+  PR,
+} from '../entities';
+
+export const AppDataSource = new DataSource({
+  type: 'postgres',
+  url: process.env.DATABASE_URL,
+  entities: [
+    User,
+    Exercise,
+    Workout,
+    WorkoutExercise,
+    WorkoutSet,
+    WorkoutTemplate,
+    TemplateExercise,
+    WeightLog,
+    BodyMeasurement,
+    Habit,
+    HabitLog,
+    Streak,
+    Achievement,
+    Reminder,
+    Notification,
+    PR,
+  ],
+  migrations: ['src/database/migrations/*.ts'],
+  synchronize: false,
+  ssl: { rejectUnauthorized: false },
+  logging: true,
+});

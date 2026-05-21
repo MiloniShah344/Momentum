@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { api } from '@/lib/api/client';
+import { useAuthStore, UserProfile } from '@/store/auth.store';
 
 function EyeIcon() {
   return (
@@ -49,6 +50,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const { setUser } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -62,40 +64,44 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const result = await api.post<{ user: UserProfile }>('/auth/login', {
         email: email.trim().toLowerCase(),
         password,
       });
 
-      if (error) {
-        setError('Invalid email or password. Please check your credentials.');
-        return;
-      }
-
+      setUser(result.user);
       router.push(redirectTo);
       router.refresh();
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed.');
     } finally {
       setIsLoading(false);
     }
   }
 
+  const inputStyle = {
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+  };
+  const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.border = '1px solid rgba(139,92,246,0.7)';
+    e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
+  };
+  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+    e.target.style.boxShadow = 'none';
+  };
+
   return (
     <div>
-      {/* Heading */}
       <div className="mb-8">
         <h2 className="text-[1.75rem] font-black text-white mb-2 tracking-tight">
           Welcome back
         </h2>
-        <p className="text-gray-400 text-sm">
-          Sign in to continue your momentum
-        </p>
+        <p className="text-gray-400 text-sm">Login to continue your momentum</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Error */}
         {error && (
           <div
             className="flex items-start gap-3 rounded-xl px-4 py-3"
@@ -122,7 +128,6 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Email */}
         <div>
           <label
             htmlFor="email"
@@ -139,22 +144,12 @@ export default function LoginPage() {
             required
             autoComplete="email"
             className="w-full rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 outline-none transition-all"
-            style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}
-            onFocus={(e) => {
-              e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-              e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
-            }}
-            onBlur={(e) => {
-              e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-              e.target.style.boxShadow = 'none';
-            }}
+            style={inputStyle}
+            onFocus={onFocus}
+            onBlur={onBlur}
           />
         </div>
 
-        {/* Password */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <label
@@ -165,10 +160,8 @@ export default function LoginPage() {
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs font-medium transition-colors"
+              className="text-xs font-medium"
               style={{ color: '#a78bfa' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#c4b5fd')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#a78bfa')}
             >
               Forgot password?
             </Link>
@@ -183,18 +176,9 @@ export default function LoginPage() {
               required
               autoComplete="current-password"
               className="w-full rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-gray-600 outline-none transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
-              onFocus={(e) => {
-                e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
-              }}
-              onBlur={(e) => {
-                e.target.style.border = '1px solid rgba(255,255,255,0.1)';
-                e.target.style.boxShadow = 'none';
-              }}
+              style={inputStyle}
+              onFocus={onFocus}
+              onBlur={onBlur}
             />
             <button
               type="button"
@@ -207,7 +191,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}
@@ -242,24 +225,21 @@ export default function LoginPage() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                 />
               </svg>
-              Signing in...
+              Logging in...
             </span>
           ) : (
-            'Sign in'
+            'Login'
           )}
         </button>
       </form>
 
-      {/* Divider + signup link */}
       <div className="mt-8 text-center">
         <p className="text-sm text-gray-500">
           Don&apos;t have an account?{' '}
           <Link
             href="/signup"
-            className="font-semibold transition-colors"
+            className="font-semibold"
             style={{ color: '#a78bfa' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#c4b5fd')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#a78bfa')}
           >
             Create one free
           </Link>

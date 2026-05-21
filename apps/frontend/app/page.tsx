@@ -1,13 +1,11 @@
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 export default async function RootPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const cookieStore = await cookies();
+  const hasToken = cookieStore.has('access_token');
 
-  if (user) {
+  if (hasToken) {
     redirect('/dashboard');
   } else {
     redirect('/login');

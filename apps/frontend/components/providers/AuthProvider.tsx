@@ -1,37 +1,25 @@
 'use client';
 
 import { useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { useAuthStore } from '@/store/auth.store';
+import { api } from '@/lib/api/client';
+import { useAuthStore, UserProfile } from '@/store/auth.store';
 
 export default function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { setUser, setSession, setInitialized } = useAuthStore();
+  const { setUser, setInitialized } = useAuthStore();
 
   useEffect(() => {
-    const supabase = createClient();
-
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setInitialized(true);
-    });
-
-    // Listen for auth changes (login, logout, token refresh)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setInitialized(true);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [setUser, setSession, setInitialized]);
+    // skipAutoRefresh: if /me returns 401, just set user=null silently.
+    // Never redirect from here — that's the middleware's job.
+    api
+      .get<{ user: UserProfile }>('/auth/me', { skipAutoRefresh: true })
+      .then(({ user }) => setUser(user))
+      .catch(() => setUser(null))
+      .finally(() => setInitialized(true));
+  }, [setUser, setInitialized]);
 
   return <>{children}</>;
 }

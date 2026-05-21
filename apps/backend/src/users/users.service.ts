@@ -18,28 +18,36 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
+  // Used only for auth — explicitly selects password_hash
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password_hash')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
+
+  async findByResetToken(token: string): Promise<User | null> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password_reset_token')
+      .where('user.password_reset_token = :token', { token })
+      .andWhere('user.password_reset_expires > :now', { now: new Date() })
+      .getOne();
+  }
+
   async create(data: {
-    id: string;
     email: string;
+    password_hash: string;
     display_name?: string;
   }): Promise<User> {
-    const user = this.usersRepository.create({
-      id: data.id,
+    const user: User = this.usersRepository.create({
       email: data.email,
+      password_hash: data.password_hash,
       display_name: data.display_name || '',
       onboarding_complete: false,
     });
     return this.usersRepository.save(user);
-  }
-
-  async findOrCreate(data: {
-    id: string;
-    email: string;
-    display_name?: string;
-  }): Promise<User> {
-    const existing = await this.findById(data.id);
-    if (existing) return existing;
-    return this.create(data);
   }
 
   async update(id: string, data: Partial<User>): Promise<User> {

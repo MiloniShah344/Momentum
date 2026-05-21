@@ -1,6 +1,6 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
@@ -8,11 +8,14 @@ import {
 
 @Entity('users')
 export class User {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
+
+  @Column({ type: 'varchar', length: 255, select: false })
+  password_hash: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   display_name: string;
@@ -49,6 +52,12 @@ export class User {
 
   @Column({ type: 'boolean', default: false })
   onboarding_complete: boolean;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, select: false })
+  password_reset_token: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  password_reset_expires: Date | null;
 
   @CreateDateColumn()
   created_at: Date;

@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { getDatabaseConfig } from './config/database.config';
-import { SupabaseModule } from './supabase/supabase.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 
@@ -15,12 +14,11 @@ import { UsersModule } from './users/users.module';
       envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // ← only ConfigModule here
+      imports: [ConfigModule],
       useFactory: (configService: ConfigService) =>
         getDatabaseConfig(configService),
       inject: [ConfigService],
     }),
-    SupabaseModule, // ← these belong at root level
     AuthModule,
     UsersModule,
   ],

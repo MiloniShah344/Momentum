@@ -1,14 +1,23 @@
 import { create } from 'zustand';
-import { User, Session } from '@supabase/supabase-js';
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  display_name: string | null;
+  onboarding_complete: boolean;
+  fitness_goal?: string | null;
+  workout_frequency_goal?: number;
+  weight_unit?: string;
+  measurement_unit?: string;
+  theme_preference?: string;
+}
 
 interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: UserProfile | null;
   isLoading: boolean;
   isInitialized: boolean;
 
-  setUser: (user: User | null) => void;
-  setSession: (session: Session | null) => void;
+  setUser: (user: UserProfile | null) => void;
   setLoading: (loading: boolean) => void;
   setInitialized: (initialized: boolean) => void;
   clearAuth: () => void;
@@ -16,13 +25,11 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  session: null,
   isLoading: false,
   isInitialized: false,
 
   setUser: (user) => set({ user }),
-  setSession: (session) => set({ session }),
   setLoading: (isLoading) => set({ isLoading }),
   setInitialized: (isInitialized) => set({ isInitialized }),
-  clearAuth: () => set({ user: null, session: null }),
+  clearAuth: () => set({ user: null }),
 }));

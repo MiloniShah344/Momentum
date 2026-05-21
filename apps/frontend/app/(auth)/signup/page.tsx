@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { api } from '@/lib/api/client';
+import { useAuthStore, UserProfile } from '@/store/auth.store';
 
 function EyeIcon() {
   return (
@@ -47,6 +48,7 @@ function EyeOffIcon() {
 
 export default function SignupPage() {
   const router = useRouter();
+  const { setUser } = useAuthStore();
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -62,62 +64,35 @@ export default function SignupPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match. Please check and try again.');
+      setError('Passwords do not match.');
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+      setError('Password must be at least 6 characters.');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password,
-          display_name: displayName.trim(),
-        }),
+      const result = await api.post<{ user: UserProfile }>('/auth/signup', {
+        email: email.trim().toLowerCase(),
+        password,
+        display_name: displayName.trim(),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle known error shapes from NestJS
-        const message =
-          data?.message ||
-          (Array.isArray(data?.message) ? data.message[0] : null) ||
-          'Signup failed. Please try again.';
-        setError(typeof message === 'string' ? message : message[0]);
-        return;
-      }
-
-      // ── Set session in Supabase client (stores cookies) ──
-      if (data.session?.access_token) {
-        const supabase = createClient();
-        await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-        });
-      }
-
+      setUser(result.user);
       router.push('/dashboard');
       router.refresh();
     } catch (err) {
-      console.error('Signup error:', err);
       setError(
-        'Could not connect to the server. Make sure the backend is running.',
+        err instanceof Error ? err.message : 'Signup failed. Please try again.',
       );
     } finally {
       setIsLoading(false);
     }
   }
 
-  // Shared input style handlers
   const inputStyle = {
     background: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(255,255,255,0.1)',
@@ -133,7 +108,6 @@ export default function SignupPage() {
 
   return (
     <div>
-      {/* Heading */}
       <div className="mb-8">
         <h2 className="text-[1.75rem] font-black text-white mb-2 tracking-tight">
           Create your account
@@ -144,7 +118,6 @@ export default function SignupPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Error */}
         {error && (
           <div
             className="flex items-start gap-3 rounded-xl px-4 py-3"
@@ -171,7 +144,6 @@ export default function SignupPage() {
           </div>
         )}
 
-        {/* Display name */}
         <div>
           <label
             htmlFor="displayName"
@@ -194,7 +166,6 @@ export default function SignupPage() {
           />
         </div>
 
-        {/* Email */}
         <div>
           <label
             htmlFor="email"
@@ -217,7 +188,6 @@ export default function SignupPage() {
           />
         </div>
 
-        {/* Password */}
         <div>
           <label
             htmlFor="password"
@@ -243,12 +213,10 @@ export default function SignupPage() {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors p-0.5"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOffIcon /> : <EyeIcon />}
             </button>
           </div>
-          {/* Password strength hint */}
           {password.length > 0 && (
             <div className="flex items-center gap-1.5 mt-2">
               {[1, 2, 3, 4].map((i) => (
@@ -294,7 +262,6 @@ export default function SignupPage() {
           )}
         </div>
 
-        {/* Confirm password */}
         <div>
           <label
             htmlFor="confirmPassword"
@@ -328,13 +295,9 @@ export default function SignupPage() {
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors p-0.5"
-              aria-label={
-                showConfirmPassword ? 'Hide password' : 'Show password'
-              }
             >
               {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
             </button>
-            {/* Match indicator */}
             {confirmPassword && (
               <span className="absolute right-10 top-1/2 -translate-y-1/2">
                 {confirmPassword === password ? (
@@ -366,7 +329,6 @@ export default function SignupPage() {
           </div>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}
@@ -401,23 +363,17 @@ export default function SignupPage() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                 />
               </svg>
-              Creating your account...
+              Creating account...
             </span>
           ) : (
             'Create free account'
           )}
         </button>
 
-        {/* Terms note */}
-        <p className="text-center text-xs text-gray-600 leading-relaxed">
-          By signing up, you agree to our{' '}
-          <span className="text-gray-500 cursor-pointer hover:text-gray-400">
-            Terms
-          </span>{' '}
-          and{' '}
-          <span className="text-gray-500 cursor-pointer hover:text-gray-400">
-            Privacy Policy
-          </span>
+        <p className="text-center text-xs text-gray-600">
+          By signing up you agree to our{' '}
+          <span className="text-gray-500">Terms</span> and{' '}
+          <span className="text-gray-500">Privacy Policy</span>
         </p>
       </form>
 
@@ -426,12 +382,10 @@ export default function SignupPage() {
           Already have an account?{' '}
           <Link
             href="/login"
-            className="font-semibold transition-colors"
+            className="font-semibold"
             style={{ color: '#a78bfa' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#c4b5fd')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#a78bfa')}
           >
-            Sign in
+            Login
           </Link>
         </p>
       </div>

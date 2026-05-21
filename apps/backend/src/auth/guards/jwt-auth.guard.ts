@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
@@ -7,53 +6,50 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SupabaseService } from '../../supabase/supabase.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<Request>();
 
-    const authHeader = request.headers['authorization'];
+    // 1. Try httpOnly cookie (browser)
+    // 2. Fallback to Authorization header (API clients / testing)
+    const token =
+      (request.cookies as Record<string, string>)?.access_token ||
+      request.headers.authorization?.split(' ')[1];
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       throw new UnauthorizedException(
-        'No authorization token provided. Include "Authorization: Bearer <token>" header.',
+        'Authentication required. Please log in.',
       );
     }
 
-    const token: string = authHeader.split(' ')[1];
-
-    if (!token) {
-      throw new UnauthorizedException('Token is empty or malformed.');
-    }
-
     try {
-      // Ask Supabase to verify the token and return the user
-      const supabase = this.supabaseService.getClient();
-      const { data, error } = await supabase.auth.getUser(token);
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+      });
 
-      if (error || !data.user) {
-        throw new UnauthorizedException(
-          'Token is invalid or expired. Please log in again.',
-        );
-      }
-
-      // Attach user to request — accessible via @CurrentUser() decorator
-      request.user = {
-        id: data.user.id,
-        email: data.user.email,
-        access_token: token,
+      // Attach decoded payload to request
+      (request as any).user = {
+        id: payload.sub,
+        email: payload.email,
       };
 
       return true;
-    } catch (err) {
-      if (err instanceof UnauthorizedException) {
-        throw err;
-      }
-      throw new UnauthorizedException('Token verification failed.');
+    } catch (err: any) {
+      const message =
+        err?.name === 'TokenExpiredError'
+          ? 'Session expired. Please log in again.'
+          : 'Invalid token. Please log in again.';
+      throw new UnauthorizedException(message);
     }
   }
 }

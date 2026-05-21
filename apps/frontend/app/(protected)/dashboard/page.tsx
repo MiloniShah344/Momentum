@@ -1,16 +1,15 @@
 'use client';
 
 import { useAuthStore } from '@/store/auth.store';
-import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api/client';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const router = useRouter();
 
   async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await api.post('/auth/logout'); // Clears httpOnly cookies server-side
     router.push('/login');
     router.refresh();
   }
@@ -28,7 +27,7 @@ export default function DashboardPage() {
             onClick={handleLogout}
             className="text-sm text-gray-400 hover:text-white transition-colors px-4 py-2 rounded-lg border border-gray-800 hover:border-gray-700"
           >
-            Sign out
+            Log out
           </button>
         </div>
 

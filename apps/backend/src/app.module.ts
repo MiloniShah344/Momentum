@@ -7,22 +7,23 @@ import { getDatabaseConfig } from './config/database.config';
 import { JwtCoreModule } from './common/jwt-core.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { HabitLogsModule } from './habit-logs/habit-logs.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) =>
         getDatabaseConfig(configService),
       inject: [ConfigService],
     }),
-    JwtCoreModule, // Global — provides JwtService everywhere
+    JwtCoreModule,
     AuthModule,
     UsersModule,
+    DashboardModule,
+    HabitLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import AppShell from '@/components/navigation/AppShell';
 
 export default async function ProtectedLayout({
   children,
@@ -7,11 +8,10 @@ export default async function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const hasToken = cookieStore.has('access_token');
 
-  if (!hasToken) {
+  if (!cookieStore.has('access_token')) {
     redirect('/login');
   }
 
-  return <>{children}</>;
+  return <AppShell>{children}</AppShell>;
 }

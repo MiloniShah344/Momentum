@@ -10,6 +10,7 @@ export interface UserProfile {
   weight_unit?: string;
   measurement_unit?: string;
   theme_preference?: string;
+  preferred_workout_days?: string[];
 }
 
 interface AuthState {

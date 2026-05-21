@@ -82,7 +82,9 @@ export default function SignupPage() {
       });
 
       setUser(result.user);
-      router.push('/dashboard');
+
+      // New users always go to onboarding
+      router.push('/onboarding');
       router.refresh();
     } catch (err) {
       setError(

@@ -70,7 +70,14 @@ export default function LoginPage() {
       });
 
       setUser(result.user);
-      router.push(redirectTo);
+
+      // Redirect to onboarding if first-time user
+      if (!result.user.onboarding_complete) {
+        router.push('/onboarding');
+      } else {
+        router.push(redirectTo);
+      }
+
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed.');

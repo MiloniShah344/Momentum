@@ -88,7 +88,8 @@ function ResetPasswordForm() {
           href="/forgot-password"
           className="inline-block font-bold text-sm py-3 px-6 rounded-xl text-white transition-all"
           style={{
-            background: 'linear-gradient(135deg, var(--primary), var(--primary-2))',
+            background:
+              'linear-gradient(135deg, var(--primary), var(--primary-2))',
             boxShadow: '0 4px 24px var(--cta-shadow)',
           }}
         >

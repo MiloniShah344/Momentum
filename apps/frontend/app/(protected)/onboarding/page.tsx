@@ -242,9 +242,7 @@ function Step1({
                   className="flex-1 py-2.5 text-sm font-semibold transition-all"
                   style={{
                     background:
-                      data.weight_unit === u
-                        ? 'var(--cta)'
-                        : 'transparent',
+                      data.weight_unit === u ? 'var(--cta)' : 'transparent',
                     color: data.weight_unit === u ? 'white' : '#6b7280',
                   }}
                 >
@@ -1008,12 +1006,8 @@ export default function OnboardingPage() {
             onClick={isLastStep ? handleComplete : () => setStep((s) => s + 1)}
             className="flex-1 text-white font-bold py-3 rounded-xl transition-all text-sm disabled:opacity-60"
             style={{
-              background: isSubmitting
-                ? 'rgba(139,92,246,0.5)'
-                : 'var(--cta)',
-              boxShadow: isSubmitting
-                ? 'none'
-                : '0 4px 24px var(--cta-shadow)',
+              background: isSubmitting ? 'rgba(139,92,246,0.5)' : 'var(--cta)',
+              boxShadow: isSubmitting ? 'none' : '0 4px 24px var(--cta-shadow)',
             }}
           >
             {isSubmitting ? (

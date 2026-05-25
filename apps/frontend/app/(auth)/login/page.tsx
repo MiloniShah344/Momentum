@@ -47,8 +47,13 @@ function EyeOffIcon() {
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  // const searchParams = useSearchParams();
+  // const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const redirectTo =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('redirect') ||
+        '/dashboard'
+      : '/dashboard';
   const { setUser } = useAuthStore();
 
   const [email, setEmail] = useState('');

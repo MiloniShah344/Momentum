@@ -12,8 +12,6 @@ export default function AuthProvider({
   const { setUser, setInitialized } = useAuthStore();
 
   useEffect(() => {
-    // skipAutoRefresh: if /me returns 401, just set user=null silently.
-    // Never redirect from here — that's the middleware's job.
     api
       .get<{ user: UserProfile }>('/auth/me', { skipAutoRefresh: true })
       .then(({ user }) => setUser(user))

@@ -47,12 +47,12 @@ export default function ForgotPasswordPage() {
   }
 
   const inputStyle = {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'var(--bg-subtle)',
+    border: '1px solid var(--border-strong)',
   };
   const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-    e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
+    e.target.style.boxShadow = '0 0 0 3px var(--bg-hover)';
   };
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     e.target.style.border = '1px solid rgba(255,255,255,0.1)';
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
         <Link
           href="/login"
           className="inline-flex items-center gap-2 text-sm font-semibold transition-colors"
-          style={{ color: '#a78bfa' }}
+          style={{ color: 'var(--primary-3)' }}
         >
           <svg
             width="16"
@@ -163,8 +163,8 @@ export default function ForgotPasswordPage() {
           style={{
             background: isLoading
               ? 'rgba(139,92,246,0.5)'
-              : 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-            boxShadow: isLoading ? 'none' : '0 4px 24px rgba(139,92,246,0.3)',
+              : 'linear-gradient(135deg, var(--primary), var(--primary-2))',
+            boxShadow: isLoading ? 'none' : '0 4px 24px var(--cta-shadow)',
           }}
         >
           {isLoading ? (

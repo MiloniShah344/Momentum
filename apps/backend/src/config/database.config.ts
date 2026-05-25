@@ -17,6 +17,7 @@ import {
   Reminder,
   Notification,
   PR,
+  ExerciseFavorite,
 } from '../entities';
 
 export const getDatabaseConfig = (
@@ -41,6 +42,7 @@ export const getDatabaseConfig = (
     Reminder,
     Notification,
     PR,
+    ExerciseFavorite,
   ],
   synchronize: configService.get<string>('NODE_ENV') === 'development',
   ssl: { rejectUnauthorized: false },

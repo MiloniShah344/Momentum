@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '@/lib/api/client';
+import { api, setTokens } from '@/lib/api/client';
 import { useAuthStore, UserProfile } from '@/store/auth.store';
 
 function EyeIcon() {
@@ -24,7 +24,6 @@ function EyeIcon() {
     </svg>
   );
 }
-
 function EyeOffIcon() {
   return (
     <svg
@@ -54,7 +53,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -62,22 +61,22 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     try {
-      const result = await api.post<{ user: UserProfile }>('/auth/login', {
+      const result = await api.post<{
+        user: UserProfile;
+        access_token: string;
+        refresh_token: string;
+      }>('/auth/login', {
         email: email.trim().toLowerCase(),
         password,
       });
 
-      setUser(result.user);
-
-      // Redirect to onboarding if first-time user
-      if (!result.user.onboarding_complete) {
-        router.push('/onboarding');
-      } else {
-        router.push(redirectTo);
+      if (result.access_token) {
+        setTokens(result.access_token, result.refresh_token);
       }
 
+      setUser(result.user);
+      router.push(result.user.onboarding_complete ? redirectTo : '/onboarding');
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed.');
@@ -86,26 +85,32 @@ export default function LoginPage() {
     }
   }
 
-  const inputStyle = {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
+  const inputStyle: React.CSSProperties = {
+    background: 'var(--bg-subtle)',
+    border: '1px solid var(--border)',
+    color: 'var(--text)',
   };
   const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-    e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
+    e.target.style.border = '1px solid var(--primary)';
+    e.target.style.boxShadow = '0 0 0 3px var(--bg-hover)';
   };
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+    e.target.style.border = '1px solid var(--border)';
     e.target.style.boxShadow = 'none';
   };
 
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-[1.75rem] font-black text-white mb-2 tracking-tight">
+        <h2
+          className="text-[1.75rem] font-black mb-2 tracking-tight"
+          style={{ color: 'var(--text)' }}
+        >
           Welcome back
         </h2>
-        <p className="text-gray-400 text-sm">Login to continue your momentum</p>
+        <p className="text-sm" style={{ color: 'var(--text-3)' }}>
+          Sign in to continue your momentum
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -117,28 +122,30 @@ export default function LoginPage() {
               border: '1px solid rgba(239,68,68,0.2)',
             }}
           >
-            <span className="text-red-400 mt-0.5 flex-shrink-0">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-            </span>
-            <p className="text-red-400 text-sm leading-snug">{error}</p>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="2"
+              className="flex-shrink-0 mt-0.5"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p className="text-sm" style={{ color: '#ef4444' }}>
+              {error}
+            </p>
           </div>
         )}
 
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-300 mb-2"
+            className="block text-sm font-semibold mb-2"
+            style={{ color: 'var(--text-2)' }}
           >
             Email address
           </label>
@@ -150,7 +157,7 @@ export default function LoginPage() {
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="w-full rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 outline-none transition-all"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
             style={inputStyle}
             onFocus={onFocus}
             onBlur={onBlur}
@@ -161,14 +168,15 @@ export default function LoginPage() {
           <div className="flex items-center justify-between mb-2">
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-300"
+              className="text-sm font-semibold"
+              style={{ color: 'var(--text-2)' }}
             >
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs font-medium"
-              style={{ color: '#a78bfa' }}
+              className="text-xs font-semibold transition-colors hover:opacity-80"
+              style={{ color: 'var(--primary)' }}
             >
               Forgot password?
             </Link>
@@ -176,24 +184,25 @@ export default function LoginPage() {
           <div className="relative">
             <input
               id="password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPw ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
               autoComplete="current-password"
-              className="w-full rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-gray-600 outline-none transition-all"
+              className="w-full rounded-xl px-4 py-3 pr-12 text-sm outline-none transition-all"
               style={inputStyle}
               onFocus={onFocus}
               onBlur={onBlur}
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors p-0.5"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => setShowPw(!showPw)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors p-0.5"
+              style={{ color: 'var(--text-4)' }}
+              aria-label={showPw ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              {showPw ? <EyeOffIcon /> : <EyeIcon />}
             </button>
           </div>
         </div>
@@ -203,10 +212,8 @@ export default function LoginPage() {
           disabled={isLoading}
           className="w-full text-white font-bold py-3 rounded-xl transition-all text-sm mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
-            background: isLoading
-              ? 'rgba(139,92,246,0.5)'
-              : 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-            boxShadow: isLoading ? 'none' : '0 4px 24px rgba(139,92,246,0.3)',
+            background: isLoading ? 'var(--primary-2)' : 'var(--cta)',
+            boxShadow: isLoading ? 'none' : '0 4px 20px var(--cta-shadow)',
           }}
         >
           {isLoading ? (
@@ -232,21 +239,21 @@ export default function LoginPage() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                 />
               </svg>
-              Logging in...
+              Signing in...
             </span>
           ) : (
-            'Login'
+            'Sign in'
           )}
         </button>
       </form>
 
       <div className="mt-8 text-center">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm" style={{ color: 'var(--text-3)' }}>
           Don&apos;t have an account?{' '}
           <Link
             href="/signup"
-            className="font-semibold"
-            style={{ color: '#a78bfa' }}
+            className="font-bold hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--primary)' }}
           >
             Create one free
           </Link>

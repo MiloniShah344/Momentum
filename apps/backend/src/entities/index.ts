@@ -14,3 +14,4 @@ export { Achievement } from './achievement.entity';
 export { Reminder } from './reminder.entity';
 export { Notification } from './notification.entity';
 export { PR } from './pr.entity';
+export { ExerciseFavorite } from './exercise-favorite.entity';

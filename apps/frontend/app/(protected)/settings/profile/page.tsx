@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { api } from '@/lib/api/client';
 import { useAuthStore, UserProfile } from '@/store/auth.store';
 
@@ -12,7 +11,6 @@ const FITNESS_GOALS = [
   { value: 'maintain', label: '⚖️ Maintain fitness' },
   { value: 'improve_endurance', label: '🏃 Improve endurance' },
 ];
-
 const DAYS = [
   { key: 'monday', label: 'Mon' },
   { key: 'tuesday', label: 'Tue' },
@@ -22,6 +20,32 @@ const DAYS = [
   { key: 'saturday', label: 'Sat' },
   { key: 'sunday', label: 'Sun' },
 ];
+
+function SectionBox({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+      }}
+    >
+      <p
+        className="text-xs font-black uppercase tracking-widest mb-4"
+        style={{ color: 'var(--text-3)' }}
+      >
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
 
 export default function ProfileSettingsPage() {
   const { user, setUser } = useAuthStore();
@@ -38,7 +62,6 @@ export default function ProfileSettingsPage() {
     weight_unit: 'kg',
     measurement_unit: 'cm',
   });
-
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -60,11 +83,10 @@ export default function ProfileSettingsPage() {
   }, [user]);
 
   function update(key: string, value: unknown) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm((p) => ({ ...p, [key]: value }));
     setSaved(false);
     setError('');
   }
-
   function toggleDay(day: string) {
     const days = form.preferred_workout_days;
     update(
@@ -76,21 +98,19 @@ export default function ProfileSettingsPage() {
   async function handleSave() {
     setIsSaving(true);
     setError('');
-
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         display_name: form.display_name || undefined,
-        height: form.height ? Number(form.height) : undefined,
-        current_weight: form.current_weight
-          ? Number(form.current_weight)
-          : undefined,
-        goal_weight: form.goal_weight ? Number(form.goal_weight) : undefined,
         fitness_goal: form.fitness_goal || undefined,
         workout_frequency_goal: form.workout_frequency_goal,
         preferred_workout_days: form.preferred_workout_days,
         weight_unit: form.weight_unit,
         measurement_unit: form.measurement_unit,
       };
+      if (form.height) payload.height = Number(form.height);
+      if (form.current_weight)
+        payload.current_weight = Number(form.current_weight);
+      if (form.goal_weight) payload.goal_weight = Number(form.goal_weight);
 
       const result = await api.patch<{ user: UserProfile }>(
         '/users/me',
@@ -100,51 +120,45 @@ export default function ProfileSettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to save. Try again.',
-      );
+      setError(err instanceof Error ? err.message : 'Failed to save.');
     } finally {
       setIsSaving(false);
     }
   }
 
-  const inputClass =
-    'w-full rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 outline-none transition-all';
-  const inputStyle = {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
+  const inputStyle: React.CSSProperties = {
+    background: 'var(--bg-subtle)',
+    border: '1px solid var(--border)',
+    color: 'var(--text)',
   };
+  const inputCls =
+    'w-full rounded-xl px-4 py-3 text-sm outline-none transition-all';
   const onFocus = (
     e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-    e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
+    e.target.style.border = '1px solid var(--primary)';
+    e.target.style.boxShadow = '0 0 0 3px var(--bg-hover)';
   };
   const onBlur = (
     e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+    e.target.style.border = '1px solid var(--border)';
     e.target.style.boxShadow = 'none';
   };
 
-  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h3
-      className="text-xs font-bold uppercase tracking-widest mb-4"
-      style={{ color: '#6b7280' }}
-    >
-      {children}
-    </h3>
-  );
-
   return (
-    <main className="min-h-screen bg-[#080812] p-6">
-      <div className="max-w-lg mx-auto">
+    <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-lg mx-auto px-5 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => router.back()}
-            className="p-2 rounded-xl text-gray-400 hover:text-white transition-colors"
-            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+            className="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-3)',
+            }}
           >
             <svg
               width="18"
@@ -158,10 +172,13 @@ export default function ProfileSettingsPage() {
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-black text-white leading-none">
+            <h1
+              className="text-xl font-black leading-none"
+              style={{ color: 'var(--text)' }}
+            >
               Edit profile
             </h1>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>
               Update your personal information
             </p>
           </div>
@@ -171,25 +188,21 @@ export default function ProfileSettingsPage() {
         <div className="flex justify-center mb-8">
           <div
             className="w-20 h-20 rounded-3xl flex items-center justify-center text-3xl font-black text-white"
-            style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
+            style={{ background: 'var(--cta)' }}
           >
             {(form.display_name || user?.email || 'U')[0].toUpperCase()}
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-4">
           {/* Basic info */}
-          <div
-            className="rounded-2xl p-5"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
-            <SectionTitle>Basic info</SectionTitle>
+          <SectionBox title="Basic info">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: 'var(--text-2)' }}
+                >
                   Display name
                 </label>
                 <input
@@ -197,100 +210,80 @@ export default function ProfileSettingsPage() {
                   value={form.display_name}
                   onChange={(e) => update('display_name', e.target.value)}
                   placeholder="Alex Johnson"
-                  className={inputClass}
+                  className={inputCls}
                   style={inputStyle}
                   onFocus={onFocus}
                   onBlur={onBlur}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: 'var(--text-2)' }}
+                >
                   Email
                 </label>
                 <input
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className={inputClass}
+                  className={inputCls}
                   style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }}
                 />
               </div>
             </div>
-          </div>
+          </SectionBox>
 
           {/* Units */}
-          <div
-            className="rounded-2xl p-5"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
-            <SectionTitle>Units</SectionTitle>
+          <SectionBox title="Units">
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-gray-500 mb-2">Weight</p>
-                <div
-                  className="flex rounded-xl overflow-hidden"
-                  style={{ border: '1px solid rgba(255,255,255,0.08)' }}
-                >
-                  {['kg', 'lbs'].map((u) => (
-                    <button
-                      key={u}
-                      type="button"
-                      onClick={() => update('weight_unit', u)}
-                      className="flex-1 py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        background:
-                          form.weight_unit === u
-                            ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
-                            : 'transparent',
-                        color: form.weight_unit === u ? 'white' : '#6b7280',
-                      }}
-                    >
-                      {u}
-                    </button>
-                  ))}
+              {[
+                { label: 'Weight', key: 'weight_unit', opts: ['kg', 'lbs'] },
+                {
+                  label: 'Measurements',
+                  key: 'measurement_unit',
+                  opts: ['cm', 'inch'],
+                },
+              ].map(({ label, key, opts }) => (
+                <div key={key}>
+                  <p
+                    className="text-xs font-medium mb-2"
+                    style={{ color: 'var(--text-3)' }}
+                  >
+                    {label}
+                  </p>
+                  <div
+                    className="flex rounded-xl overflow-hidden"
+                    style={{ border: '1px solid var(--border)' }}
+                  >
+                    {opts.map((u) => (
+                      <button
+                        key={u}
+                        type="button"
+                        onClick={() => update(key, u)}
+                        className="flex-1 py-2.5 text-sm font-bold transition-all"
+                        style={{
+                          background:
+                            form[key as keyof typeof form] === u
+                              ? 'var(--cta)'
+                              : 'transparent',
+                          color:
+                            form[key as keyof typeof form] === u
+                              ? 'white'
+                              : 'var(--text-3)',
+                        }}
+                      >
+                        {u}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-2">Measurements</p>
-                <div
-                  className="flex rounded-xl overflow-hidden"
-                  style={{ border: '1px solid rgba(255,255,255,0.08)' }}
-                >
-                  {['cm', 'inch'].map((u) => (
-                    <button
-                      key={u}
-                      type="button"
-                      onClick={() => update('measurement_unit', u)}
-                      className="flex-1 py-2.5 text-sm font-semibold transition-all"
-                      style={{
-                        background:
-                          form.measurement_unit === u
-                            ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
-                            : 'transparent',
-                        color:
-                          form.measurement_unit === u ? 'white' : '#6b7280',
-                      }}
-                    >
-                      {u}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
+          </SectionBox>
 
           {/* Body metrics */}
-          <div
-            className="rounded-2xl p-5"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
-            <SectionTitle>Body metrics</SectionTitle>
+          <SectionBox title="Body metrics">
             <div className="grid grid-cols-3 gap-3">
               {[
                 {
@@ -310,7 +303,10 @@ export default function ProfileSettingsPage() {
                 },
               ].map((f) => (
                 <div key={f.key}>
-                  <label className="block text-xs font-medium text-gray-400 mb-2">
+                  <label
+                    className="block text-xs font-semibold mb-2"
+                    style={{ color: 'var(--text-3)' }}
+                  >
                     {f.label}
                   </label>
                   <input
@@ -318,7 +314,7 @@ export default function ProfileSettingsPage() {
                     value={form[f.key as keyof typeof form] as string}
                     onChange={(e) => update(f.key, e.target.value)}
                     placeholder={f.placeholder}
-                    className={inputClass}
+                    className={inputCls}
                     style={inputStyle}
                     onFocus={onFocus}
                     onBlur={onBlur}
@@ -326,26 +322,22 @@ export default function ProfileSettingsPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </SectionBox>
 
           {/* Fitness goal */}
-          <div
-            className="rounded-2xl p-5"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
-            <SectionTitle>Fitness goal</SectionTitle>
+          <SectionBox title="Fitness goal">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: 'var(--text-2)' }}
+                >
                   Primary goal
                 </label>
                 <select
                   value={form.fitness_goal}
                   onChange={(e) => update('fitness_goal', e.target.value)}
-                  className={inputClass}
+                  className={inputCls}
                   style={inputStyle}
                   onFocus={onFocus}
                   onBlur={onBlur}
@@ -360,9 +352,12 @@ export default function ProfileSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Weekly workout target:{' '}
-                  <span className="text-violet-400">
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: 'var(--text-2)' }}
+                >
+                  Weekly target:{' '}
+                  <span style={{ color: 'var(--primary)' }}>
                     {form.workout_frequency_goal}×
                   </span>
                 </label>
@@ -374,23 +369,27 @@ export default function ProfileSettingsPage() {
                   onChange={(e) =>
                     update('workout_frequency_goal', Number(e.target.value))
                   }
-                  className="w-full accent-violet-500"
+                  className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-600 mt-1">
+                <div
+                  className="flex justify-between text-xs mt-1"
+                  style={{ color: 'var(--text-4)' }}
+                >
                   <span>1×</span>
                   <span>7×</span>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-medium text-gray-300 mb-3">
-                  Preferred workout days
+                <p
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: 'var(--text-2)' }}
+                >
+                  Preferred days
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   {DAYS.map((day) => {
-                    const selected = form.preferred_workout_days.includes(
-                      day.key,
-                    );
+                    const sel = form.preferred_workout_days.includes(day.key);
                     return (
                       <button
                         key={day.key}
@@ -398,13 +397,9 @@ export default function ProfileSettingsPage() {
                         onClick={() => toggleDay(day.key)}
                         className="px-3 py-2 rounded-xl text-xs font-bold transition-all"
                         style={{
-                          background: selected
-                            ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
-                            : 'rgba(255,255,255,0.05)',
-                          border: selected
-                            ? '1.5px solid rgba(139,92,246,0.5)'
-                            : '1px solid rgba(255,255,255,0.08)',
-                          color: selected ? 'white' : '#6b7280',
+                          background: sel ? 'var(--cta)' : 'var(--bg-subtle)',
+                          color: sel ? 'white' : 'var(--text-3)',
+                          border: `1px solid ${sel ? 'transparent' : 'var(--border)'}`,
                         }}
                       >
                         {day.label}
@@ -414,66 +409,37 @@ export default function ProfileSettingsPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </SectionBox>
 
-          {/* Error */}
           {error && (
             <div
-              className="rounded-xl px-4 py-3 flex items-center gap-3"
+              className="rounded-xl px-4 py-3"
               style={{
                 background: 'rgba(239,68,68,0.08)',
                 border: '1px solid rgba(239,68,68,0.2)',
               }}
             >
-              <p className="text-red-400 text-sm">{error}</p>
+              <p className="text-sm" style={{ color: '#ef4444' }}>
+                {error}
+              </p>
             </div>
           )}
 
-          {/* Save button */}
           <button
             onClick={handleSave}
             disabled={isSaving}
             className="w-full text-white font-bold py-3.5 rounded-2xl transition-all text-sm disabled:opacity-60"
             style={{
               background: saved
-                ? 'rgba(34,197,94,0.8)'
+                ? '#10b981'
                 : isSaving
-                  ? 'rgba(139,92,246,0.5)'
-                  : 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+                  ? 'var(--primary-2)'
+                  : 'var(--cta)',
               boxShadow:
-                saved || isSaving ? 'none' : '0 4px 24px rgba(139,92,246,0.3)',
+                saved || isSaving ? 'none' : '0 4px 20px var(--cta-shadow)',
             }}
           >
-            {isSaving ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg
-                  className="animate-spin"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-                Saving...
-              </span>
-            ) : saved ? (
-              '✓ Saved!'
-            ) : (
-              'Save changes'
-            )}
+            {isSaving ? 'Saving...' : saved ? '✓ Saved!' : 'Save changes'}
           </button>
         </div>
       </div>

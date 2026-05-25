@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '@/lib/api/client';
+import { api, setTokens } from '@/lib/api/client';
 import { useAuthStore, UserProfile } from '@/store/auth.store';
 
 function EyeIcon() {
@@ -24,7 +24,6 @@ function EyeIcon() {
     </svg>
   );
 }
-
 function EyeOffIcon() {
   return (
     <svg
@@ -54,15 +53,14 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
@@ -71,19 +69,23 @@ export default function SignupPage() {
       setError('Password must be at least 6 characters.');
       return;
     }
-
     setIsLoading(true);
-
     try {
-      const result = await api.post<{ user: UserProfile }>('/auth/signup', {
+      const result = await api.post<{
+        user: UserProfile;
+        access_token: string;
+        refresh_token: string;
+      }>('/auth/login', {
         email: email.trim().toLowerCase(),
         password,
         display_name: displayName.trim(),
       });
 
-      setUser(result.user);
+      if (result.access_token) {
+        setTokens(result.access_token, result.refresh_token);
+      }
 
-      // New users always go to onboarding
+      setUser(result.user);
       router.push('/onboarding');
       router.refresh();
     } catch (err) {
@@ -95,27 +97,47 @@ export default function SignupPage() {
     }
   }
 
-  const inputStyle = {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
+  const inputStyle: React.CSSProperties = {
+    background: 'var(--bg-subtle)',
+    border: '1px solid var(--border)',
+    color: 'var(--text)',
   };
   const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-    e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
+    e.target.style.border = '1px solid var(--primary)';
+    e.target.style.boxShadow = '0 0 0 3px var(--bg-hover)';
   };
   const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.border = '1px solid rgba(255,255,255,0.1)';
+    e.target.style.border = '1px solid var(--border)';
     e.target.style.boxShadow = 'none';
   };
+  const strengthColor =
+    password.length < 4
+      ? '#ef4444'
+      : password.length < 7
+        ? '#f97316'
+        : password.length < 10
+          ? '#f59e0b'
+          : '#10b981';
+  const strengthLabel =
+    password.length < 4
+      ? 'Weak'
+      : password.length < 7
+        ? 'Fair'
+        : password.length < 10
+          ? 'Good'
+          : 'Strong';
 
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-[1.75rem] font-black text-white mb-2 tracking-tight">
+        <h2
+          className="text-[1.75rem] font-black mb-2 tracking-tight"
+          style={{ color: 'var(--text)' }}
+        >
           Create your account
         </h2>
-        <p className="text-gray-400 text-sm">
-          Start tracking your fitness today — it&apos;s free
+        <p className="text-sm" style={{ color: 'var(--text-3)' }}>
+          Start tracking your fitness — it&apos;s free
         </p>
       </div>
 
@@ -128,28 +150,31 @@ export default function SignupPage() {
               border: '1px solid rgba(239,68,68,0.2)',
             }}
           >
-            <span className="text-red-400 mt-0.5 flex-shrink-0">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-            </span>
-            <p className="text-red-400 text-sm leading-snug">{error}</p>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="2"
+              className="flex-shrink-0 mt-0.5"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p className="text-sm" style={{ color: '#ef4444' }}>
+              {error}
+            </p>
           </div>
         )}
 
+        {/* Name */}
         <div>
           <label
             htmlFor="displayName"
-            className="block text-sm font-medium text-gray-300 mb-2"
+            className="block text-sm font-semibold mb-2"
+            style={{ color: 'var(--text-2)' }}
           >
             Your name
           </label>
@@ -161,17 +186,19 @@ export default function SignupPage() {
             placeholder="Alex Johnson"
             required
             autoComplete="name"
-            className="w-full rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 outline-none transition-all"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
             style={inputStyle}
             onFocus={onFocus}
             onBlur={onBlur}
           />
         </div>
 
+        {/* Email */}
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-300 mb-2"
+            className="block text-sm font-semibold mb-2"
+            style={{ color: 'var(--text-2)' }}
           >
             Email address
           </label>
@@ -183,40 +210,43 @@ export default function SignupPage() {
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="w-full rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 outline-none transition-all"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
             style={inputStyle}
             onFocus={onFocus}
             onBlur={onBlur}
           />
         </div>
 
+        {/* Password */}
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-300 mb-2"
+            className="block text-sm font-semibold mb-2"
+            style={{ color: 'var(--text-2)' }}
           >
             Password
           </label>
           <div className="relative">
             <input
               id="password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPw ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
               required
               autoComplete="new-password"
-              className="w-full rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-gray-600 outline-none transition-all"
+              className="w-full rounded-xl px-4 py-3 pr-12 text-sm outline-none transition-all"
               style={inputStyle}
               onFocus={onFocus}
               onBlur={onBlur}
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors p-0.5"
+              onClick={() => setShowPw(!showPw)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-0.5"
+              style={{ color: 'var(--text-4)' }}
             >
-              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              {showPw ? <EyeOffIcon /> : <EyeIcon />}
             </button>
           </div>
           {password.length > 0 && (
@@ -224,70 +254,51 @@ export default function SignupPage() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-1 flex-1 rounded-full transition-colors"
+                  className="h-1 flex-1 rounded-full transition-all"
                   style={{
                     background:
                       password.length >= i * 3
-                        ? i <= 1
-                          ? '#ef4444'
-                          : i <= 2
-                            ? '#f97316'
-                            : i <= 3
-                              ? '#eab308'
-                              : '#22c55e'
-                        : 'rgba(255,255,255,0.1)',
+                        ? strengthColor
+                        : 'var(--bg-subtle)',
                   }}
                 />
               ))}
               <span
-                className="text-xs ml-1"
-                style={{
-                  color:
-                    password.length < 4
-                      ? '#ef4444'
-                      : password.length < 7
-                        ? '#f97316'
-                        : password.length < 10
-                          ? '#eab308'
-                          : '#22c55e',
-                }}
+                className="text-xs ml-1 font-semibold"
+                style={{ color: strengthColor }}
               >
-                {password.length < 4
-                  ? 'Weak'
-                  : password.length < 7
-                    ? 'Fair'
-                    : password.length < 10
-                      ? 'Good'
-                      : 'Strong'}
+                {strengthLabel}
               </span>
             </div>
           )}
         </div>
 
+        {/* Confirm */}
         <div>
           <label
             htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-300 mb-2"
+            className="block text-sm font-semibold mb-2"
+            style={{ color: 'var(--text-2)' }}
           >
             Confirm password
           </label>
           <div className="relative">
             <input
               id="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
+              type={showConfirm ? 'text' : 'password'}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               required
               autoComplete="new-password"
-              className="w-full rounded-xl px-4 py-3 pr-12 text-white text-sm placeholder-gray-600 outline-none transition-all"
+              className="w-full rounded-xl px-4 py-3 pr-12 text-sm outline-none transition-all"
               style={{
                 ...inputStyle,
                 border:
                   confirmPassword && confirmPassword !== password
-                    ? '1px solid rgba(239,68,68,0.5)'
+                    ? '1px solid rgba(239,68,68,0.6)'
                     : confirmPassword && confirmPassword === password
-                      ? '1px solid rgba(34,197,94,0.5)'
+                      ? '1px solid rgba(16,185,129,0.6)'
                       : inputStyle.border,
               }}
               onFocus={onFocus}
@@ -295,10 +306,11 @@ export default function SignupPage() {
             />
             <button
               type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors p-0.5"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-0.5"
+              style={{ color: 'var(--text-4)' }}
             >
-              {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+              {showConfirm ? <EyeOffIcon /> : <EyeIcon />}
             </button>
             {confirmPassword && (
               <span className="absolute right-10 top-1/2 -translate-y-1/2">
@@ -308,7 +320,7 @@ export default function SignupPage() {
                     height="16"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#22c55e"
+                    stroke="#10b981"
                     strokeWidth="2.5"
                   >
                     <polyline points="20 6 9 17 4 12" />
@@ -336,10 +348,8 @@ export default function SignupPage() {
           disabled={isLoading}
           className="w-full text-white font-bold py-3 rounded-xl transition-all text-sm mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
-            background: isLoading
-              ? 'rgba(139,92,246,0.5)'
-              : 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-            boxShadow: isLoading ? 'none' : '0 4px 24px rgba(139,92,246,0.3)',
+            background: isLoading ? 'var(--primary-2)' : 'var(--cta)',
+            boxShadow: isLoading ? 'none' : '0 4px 20px var(--cta-shadow)',
           }}
         >
           {isLoading ? (
@@ -371,23 +381,20 @@ export default function SignupPage() {
             'Create free account'
           )}
         </button>
-
-        <p className="text-center text-xs text-gray-600">
-          By signing up you agree to our{' '}
-          <span className="text-gray-500">Terms</span> and{' '}
-          <span className="text-gray-500">Privacy Policy</span>
+        <p className="text-center text-xs" style={{ color: 'var(--text-4)' }}>
+          By signing up you agree to our Terms and Privacy Policy
         </p>
       </form>
 
       <div className="mt-6 text-center">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm" style={{ color: 'var(--text-3)' }}>
           Already have an account?{' '}
           <Link
             href="/login"
-            className="font-semibold"
-            style={{ color: '#a78bfa' }}
+            className="font-bold hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--primary)' }}
           >
-            Login
+            Sign in
           </Link>
         </p>
       </div>

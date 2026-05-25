@@ -7,14 +7,14 @@ const NAV_ITEMS = [
   {
     href: '/dashboard',
     label: 'Home',
-    icon: (active: boolean) => (
+    icon: (a: boolean) => (
       <svg
         width="22"
         height="22"
         viewBox="0 0 24 24"
-        fill={active ? 'currentColor' : 'none'}
-        stroke="currentColor"
-        strokeWidth={active ? 0 : 1.8}
+        fill={a ? 'var(--primary)' : 'none'}
+        stroke={a ? 'var(--primary)' : 'var(--text-3)'}
+        strokeWidth={a ? 0 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -26,14 +26,14 @@ const NAV_ITEMS = [
   {
     href: '/workouts',
     label: 'Workouts',
-    icon: (active: boolean) => (
+    icon: (a: boolean) => (
       <svg
         width="22"
         height="22"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.8}
+        stroke={a ? 'var(--primary)' : 'var(--text-3)'}
+        strokeWidth={a ? 2.2 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -42,36 +42,36 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: '/progress',
-    label: 'Progress',
-    icon: (active: boolean) => (
+    href: '/exercises',
+    label: 'Exercises',
+    icon: (a: boolean) => (
       <svg
         width="22"
         height="22"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.8}
+        stroke={a ? 'var(--primary)' : 'var(--text-3)'}
+        strokeWidth={a ? 2.2 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <line x1="18" y1="20" x2="18" y2="10" />
-        <line x1="12" y1="20" x2="12" y2="4" />
-        <line x1="6" y1="20" x2="6" y2="14" />
+        <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+        <line x1="16" y1="8" x2="2" y2="22" />
+        <line x1="17.5" y1="15" x2="9" y2="15" />
       </svg>
     ),
   },
   {
     href: '/habits',
     label: 'Habits',
-    icon: (active: boolean) => (
+    icon: (a: boolean) => (
       <svg
         width="22"
         height="22"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.8}
+        stroke={a ? 'var(--primary)' : 'var(--text-3)'}
+        strokeWidth={a ? 2.2 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -83,14 +83,14 @@ const NAV_ITEMS = [
   {
     href: '/settings',
     label: 'Settings',
-    icon: (active: boolean) => (
+    icon: (a: boolean) => (
       <svg
         width="22"
         height="22"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="currentColor"
-        strokeWidth={active ? 2.2 : 1.8}
+        stroke={a ? 'var(--primary)' : 'var(--text-3)'}
+        strokeWidth={a ? 2.2 : 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -103,33 +103,31 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: 'rgba(8,8,18,0.95)',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
+        background: 'var(--bg-card)',
+        borderTop: '1px solid var(--border)',
         backdropFilter: 'blur(20px)',
       }}
     >
-      <div className="flex items-center justify-around px-2 py-2 max-w-lg mx-auto">
+      <div className="flex items-center justify-around px-1 py-2 max-w-lg mx-auto">
         {NAV_ITEMS.map((item) => {
-          const isActive =
+          const active =
             pathname === item.href ||
             (item.href !== '/dashboard' && pathname.startsWith(item.href));
-
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all min-w-0"
-              style={{ color: isActive ? '#8b5cf6' : '#4b5563' }}
+              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-0"
+              style={{ color: active ? 'var(--primary)' : 'var(--text-3)' }}
             >
-              {item.icon(isActive)}
+              {item.icon(active)}
               <span
                 className="text-[10px] font-semibold tracking-wide"
-                style={{ color: isActive ? '#8b5cf6' : '#4b5563' }}
+                style={{ color: active ? 'var(--primary)' : 'var(--text-3)' }}
               >
                 {item.label}
               </span>

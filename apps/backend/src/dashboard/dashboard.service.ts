@@ -177,6 +177,7 @@ export class DashboardService {
       user,
       streak,
       weeklyCount,
+      recentWorkoutDates,
       todayWorkout,
       habits,
       todayLogs,
@@ -196,6 +197,20 @@ export class DashboardService {
         .andWhere('w.date <= :today', { today })
         .andWhere('w.status = :status', { status: 'completed' })
         .getCount(),
+
+      this.workoutRepo
+        .createQueryBuilder('w')
+        .select('DISTINCT w.date', 'date')
+        .where('w.user_id = :userId', { userId })
+        .andWhere('w.date >= :start', {
+          start: (() => {
+            const d = new Date();
+            d.setDate(d.getDate() - 27);
+            return d.toISOString().split('T')[0];
+          })(),
+        })
+        .andWhere('w.status = :status', { status: 'completed' })
+        .getRawMany(),
 
       // Today's completed workout
       this.workoutRepo.findOne({
@@ -292,6 +307,7 @@ export class DashboardService {
         workout_done: !!todayWorkout,
         date: today,
       },
+      activity_dates: recentWorkoutDates.map((r: { date: string }) => r.date),
       habits: habitsWithStatus,
       weight: weightData,
       quote: this.getDailyQuote(),

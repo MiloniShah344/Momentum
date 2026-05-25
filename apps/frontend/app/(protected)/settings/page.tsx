@@ -1,28 +1,29 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api/client';
+import { useAuthStore } from '@/store/auth.store';
+import { api, clearTokens } from '@/lib/api/client';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
-const settingsSections = [
+const SECTIONS = [
   {
     href: '/settings/profile',
     icon: '👤',
     label: 'Profile',
-    description: 'Name, height, weight, goals',
+    desc: 'Name, height, weight, goals',
   },
   {
     href: '/settings/reminders',
     icon: '🔔',
     label: 'Reminders',
-    description: 'Workout and habit reminders',
+    desc: 'Workout and habit reminders',
   },
   {
     href: '/settings/account',
     icon: '🔐',
     label: 'Account',
-    description: 'Password, security, sessions',
+    desc: 'Password and security',
   },
 ];
 
@@ -31,68 +32,93 @@ export default function SettingsPage() {
   const router = useRouter();
 
   async function handleLogout() {
-    await api.post('/auth/logout');
+    await api.post('/auth/logout').catch(() => {});
+    clearTokens();
     router.push('/login');
     router.refresh();
   }
 
   return (
-    <main className="min-h-screen bg-[#080812] p-6">
-      <div className="max-w-lg mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-black text-white mb-1">Settings</h1>
-          <p className="text-gray-500 text-sm">Manage your Momentum account</p>
+    <main className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-lg mx-auto px-5 py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1
+              className="text-2xl font-black"
+              style={{ color: 'var(--text)' }}
+            >
+              Settings
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: 'var(--text-3)' }}>
+              Manage your Momentum account
+            </p>
+          </div>
+          <ThemeToggle />
         </div>
 
-        {/* Profile summary */}
+        {/* Profile card */}
         <div
           className="rounded-2xl p-5 mb-6 flex items-center gap-4"
           style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
           }}
         >
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl font-black text-white"
-            style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
+            style={{ background: 'var(--cta)' }}
           >
             {(user?.display_name || user?.email || 'U')[0].toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-white font-bold truncate">
+            <p className="font-bold truncate" style={{ color: 'var(--text)' }}>
               {user?.display_name || 'Your name'}
             </p>
-            <p className="text-gray-500 text-sm truncate">{user?.email}</p>
+            <p className="text-sm truncate" style={{ color: 'var(--text-3)' }}>
+              {user?.email}
+            </p>
           </div>
         </div>
 
         {/* Section links */}
         <div className="space-y-2 mb-8">
-          {settingsSections.map((section) => (
+          {SECTIONS.map((section) => (
             <Link
               key={section.href}
               href={section.href}
-              className="flex items-center gap-4 p-4 rounded-2xl transition-all group"
+              className="flex items-center gap-4 p-4 rounded-2xl transition-all group block"
               style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
               }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.borderColor = 'var(--border-strong)')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.borderColor = 'var(--border)')
+              }
             >
               <span className="text-2xl flex-shrink-0">{section.icon}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm">
+                <p
+                  className="font-semibold text-sm"
+                  style={{ color: 'var(--text)' }}
+                >
                   {section.label}
                 </p>
-                <p className="text-gray-500 text-xs">{section.description}</p>
+                <p className="text-xs" style={{ color: 'var(--text-3)' }}>
+                  {section.desc}
+                </p>
               </div>
               <svg
                 width="16"
                 height="16"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#4b5563"
+                stroke="var(--text-4)"
                 strokeWidth="2"
-                className="flex-shrink-0 group-hover:stroke-gray-300 transition-colors"
+                className="flex-shrink-0"
               >
                 <path d="M9 18l6-6-6-6" />
               </svg>
@@ -103,11 +129,11 @@ export default function SettingsPage() {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full py-3 rounded-2xl text-sm font-semibold transition-colors"
+          className="w-full py-3 rounded-2xl text-sm font-bold transition-colors"
           style={{
-            background: 'rgba(239,68,68,0.06)',
-            border: '1px solid rgba(239,68,68,0.15)',
-            color: '#f87171',
+            background: 'rgba(239,68,68,0.07)',
+            border: '1px solid rgba(239,68,68,0.18)',
+            color: '#ef4444',
           }}
         >
           Sign out

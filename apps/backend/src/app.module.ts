@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HabitLogsModule } from './habit-logs/habit-logs.module';
+import { ExercisesModule } from './exercises/exercises.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { HabitLogsModule } from './habit-logs/habit-logs.module';
     UsersModule,
     DashboardModule,
     HabitLogsModule,
+    ExercisesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

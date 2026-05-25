@@ -2,26 +2,100 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Light theme ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f5f8ff;
+  --bg-card: #ffffff;
+  --bg-subtle: #edf3ff;
+  --bg-hover: #ddeeff;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.18);
+
+  --text: #0d1117;
+  --text-2: #2d3748;
+  --text-3: #5a6a7e;
+  --text-4: #8fa3b8;
+
+  --primary: #0ea5e9;
+  --primary-2: #0284c7;
+  --primary-3: #38bdf8;
+  --cta: linear-gradient(135deg, #0ea5e9, #06b6d4);
+  --cta-shadow: rgba(14, 165, 233, 0.3);
+
+  --accent: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --streak: #f97316;
+  --streak-2: #ea580c;
+
+  /* Muscle group palette */
+  --mg-chest: #ef4444;
+  --mg-back: #3b82f6;
+  --mg-legs: #10b981;
+  --mg-shoulders: #f59e0b;
+  --mg-biceps: #8b5cf6;
+  --mg-triceps: #a855f7;
+  --mg-core: #06b6d4;
+  --mg-cardio: #f97316;
+  --mg-full-body: #ec4899;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Dark theme ── */
+.dark {
+  --bg: #07090f;
+  --bg-card: #0d1526;
+  --bg-subtle: rgba(255, 255, 255, 0.05);
+  --bg-hover: rgba(14, 165, 233, 0.1);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #f0f6ff;
+  --text-2: #c5d4e8;
+  --text-3: #6b82a0;
+  --text-4: #3a4a5e;
+}
+
+/* ── Base ── */
+html {
+  transition: background-color 0.2s ease;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  min-height: 100vh;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+/* ── Form elements ── */
+input[type='range'] {
+  accent-color: var(--primary);
+}
+select {
+  color: var(--text);
+  background: var(--bg-subtle);
+}
+
+/* ── Dark mode select options ── */
+.dark select option {
+  background: #0d1526;
+  color: #f0f6ff;
+}
+
+/* ── Placeholder ── */
+::placeholder {
+  color: var(--text-4) !important;
+  opacity: 1;
 }

@@ -53,7 +53,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
                 i + 1 < current
                   ? 'rgba(139,92,246,0.5)'
                   : i + 1 === current
-                    ? 'linear-gradient(90deg, #8b5cf6, #6366f1)'
+                    ? 'linear-gradient(90deg, var(--primary), #6366f1)'
                     : 'rgba(255,255,255,0.1)',
             }}
           />
@@ -88,7 +88,7 @@ function OptionCard({
       className="w-full text-left rounded-2xl p-5 transition-all duration-200"
       style={{
         background: selected
-          ? gradient || 'rgba(139,92,246,0.15)'
+          ? gradient || 'var(--bg-hover)'
           : 'rgba(255,255,255,0.03)',
         border: selected
           ? '1.5px solid rgba(139,92,246,0.6)'
@@ -109,7 +109,7 @@ function OptionCard({
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8b5cf6"
+              stroke="var(--primary)"
               strokeWidth="2.5"
             >
               <path d="M20 6L9 17l-5-5" />
@@ -153,12 +153,12 @@ function NumberInput({
           max={max}
           className="w-full rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 outline-none transition-all"
           style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'var(--bg-subtle)',
+            border: '1px solid var(--border-strong)',
           }}
           onFocus={(e) => {
             e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-            e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
+            e.target.style.boxShadow = '0 0 0 3px var(--bg-hover)';
           }}
           onBlur={(e) => {
             e.target.style.border = '1px solid rgba(255,255,255,0.1)';
@@ -206,12 +206,12 @@ function Step1({
           placeholder="Alex Johnson"
           className="w-full rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 outline-none transition-all"
           style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'var(--bg-subtle)',
+            border: '1px solid var(--border-strong)',
           }}
           onFocus={(e) => {
             e.target.style.border = '1px solid rgba(139,92,246,0.7)';
-            e.target.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.12)';
+            e.target.style.boxShadow = '0 0 0 3px var(--bg-hover)';
           }}
           onBlur={(e) => {
             e.target.style.border = '1px solid rgba(255,255,255,0.1)';
@@ -232,7 +232,7 @@ function Step1({
             </p>
             <div
               className="flex rounded-xl overflow-hidden"
-              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ border: '1px solid var(--border)' }}
             >
               {(['kg', 'lbs'] as const).map((u) => (
                 <button
@@ -243,7 +243,7 @@ function Step1({
                   style={{
                     background:
                       data.weight_unit === u
-                        ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
+                        ? 'var(--cta)'
                         : 'transparent',
                     color: data.weight_unit === u ? 'white' : '#6b7280',
                   }}
@@ -259,7 +259,7 @@ function Step1({
             </p>
             <div
               className="flex rounded-xl overflow-hidden"
-              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ border: '1px solid var(--border)' }}
             >
               {(['cm', 'inch'] as const).map((u) => (
                 <button
@@ -270,7 +270,7 @@ function Step1({
                   style={{
                     background:
                       data.measurement_unit === u
-                        ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
+                        ? 'var(--cta)'
                         : 'transparent',
                     color: data.measurement_unit === u ? 'white' : '#6b7280',
                   }}
@@ -387,7 +387,7 @@ function Step3({
         <span
           className="text-8xl font-black"
           style={{
-            background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+            background: 'var(--cta)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
@@ -407,7 +407,7 @@ function Step3({
             style={{
               background:
                 data.workout_frequency_goal === opt.value
-                  ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
+                  ? 'var(--cta)'
                   : 'rgba(255,255,255,0.03)',
               border:
                 data.workout_frequency_goal === opt.value
@@ -487,7 +487,7 @@ function Step4({
               className="flex flex-col items-center gap-2 py-4 rounded-2xl transition-all duration-200"
               style={{
                 background: isSelected
-                  ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
+                  ? 'var(--cta)'
                   : 'rgba(255,255,255,0.03)',
                 border: isSelected
                   ? '1.5px solid rgba(139,92,246,0.6)'
@@ -543,8 +543,8 @@ function Step5({
       <div
         className="rounded-2xl p-6 space-y-5"
         style={{
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--bg-subtle)',
+          border: '1px solid var(--border)',
         }}
       >
         <NumberInput
@@ -560,12 +560,12 @@ function Step5({
         <div className="flex items-center gap-3">
           <div
             className="flex-1 h-px"
-            style={{ background: 'rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--bg-subtle)' }}
           />
           <span className="text-gray-500 text-xs">target</span>
           <div
             className="flex-1 h-px"
-            style={{ background: 'rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--bg-subtle)' }}
           />
         </div>
 
@@ -584,8 +584,8 @@ function Step5({
         <div
           className="rounded-xl px-4 py-3 text-sm"
           style={{
-            background: 'rgba(139,92,246,0.08)',
-            border: '1px solid rgba(139,92,246,0.2)',
+            background: 'var(--bg-subtle)',
+            border: '1px solid rgba(14,165,233,0.2)',
           }}
         >
           <p className="text-violet-300">
@@ -734,7 +734,7 @@ function Step7({
               className="flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-200"
               style={{
                 background: isSelected
-                  ? 'rgba(139,92,246,0.12)'
+                  ? 'var(--bg-hover)'
                   : 'rgba(255,255,255,0.03)',
                 border: isSelected
                   ? '1.5px solid rgba(139,92,246,0.5)'
@@ -752,7 +752,7 @@ function Step7({
                 className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-all"
                 style={{
                   background: isSelected
-                    ? 'linear-gradient(135deg, #8b5cf6, #6366f1)'
+                    ? 'var(--cta)'
                     : 'rgba(255,255,255,0.06)',
                   border: isSelected
                     ? 'none'
@@ -932,7 +932,7 @@ export default function OnboardingPage() {
         <div className="flex items-center gap-2">
           <div
             className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
+            style={{ background: 'var(--cta)' }}
           >
             <span className="text-white font-black text-sm">M</span>
           </div>
@@ -985,7 +985,7 @@ export default function OnboardingPage() {
               type="button"
               onClick={() => setStep((s) => s - 1)}
               className="flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm text-gray-400 hover:text-white transition-colors flex-shrink-0"
-              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ border: '1px solid var(--border)' }}
             >
               <svg
                 width="16"
@@ -1010,10 +1010,10 @@ export default function OnboardingPage() {
             style={{
               background: isSubmitting
                 ? 'rgba(139,92,246,0.5)'
-                : 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+                : 'var(--cta)',
               boxShadow: isSubmitting
                 ? 'none'
-                : '0 4px 24px rgba(139,92,246,0.3)',
+                : '0 4px 24px var(--cta-shadow)',
             }}
           >
             {isSubmitting ? (
@@ -1054,7 +1054,7 @@ export default function OnboardingPage() {
               type="button"
               onClick={() => setStep((s) => s + 1)}
               className="px-4 py-3 rounded-xl font-medium text-sm text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0"
-              style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ border: '1px solid var(--border)' }}
             >
               Skip
             </button>
@@ -1065,7 +1065,7 @@ export default function OnboardingPage() {
               disabled={isSubmitting}
               onClick={handleComplete}
               className="px-4 py-3 rounded-xl font-medium text-sm text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0 disabled:opacity-60"
-              style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ border: '1px solid var(--border)' }}
             >
               Skip
             </button>

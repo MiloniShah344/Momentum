@@ -45,7 +45,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.authService.signup(dto);
-
     res.cookie(
       'access_token',
       result.tokens.accessToken,
@@ -56,11 +55,12 @@ export class AuthController {
       result.tokens.refreshToken,
       REFRESH_COOKIE_OPTIONS,
     );
-
-    // Don't send raw tokens in response body — they live in httpOnly cookies
+    // Return tokens in body for cross-domain deployments
     return {
       message: result.message,
       user: result.user,
+      access_token: result.tokens.accessToken,
+      refresh_token: result.tokens.refreshToken,
     };
   }
 
@@ -71,7 +71,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.authService.login(dto);
-
     res.cookie(
       'access_token',
       result.tokens.accessToken,
@@ -82,10 +81,11 @@ export class AuthController {
       result.tokens.refreshToken,
       REFRESH_COOKIE_OPTIONS,
     );
-
     return {
       message: result.message,
       user: result.user,
+      access_token: result.tokens.accessToken,
+      refresh_token: result.tokens.refreshToken,
     };
   }
 
@@ -95,10 +95,11 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = (req.cookies as Record<string, string>)?.refresh_token;
-
+    // Accept refresh token from cookie OR body
+    const refreshToken =
+      (req.cookies as Record<string, string>)?.refresh_token ||
+      (req.body as Record<string, string>)?.refresh_token;
     const result = await this.authService.refreshToken(refreshToken);
-
     res.cookie(
       'access_token',
       result.tokens.accessToken,
@@ -109,8 +110,11 @@ export class AuthController {
       result.tokens.refreshToken,
       REFRESH_COOKIE_OPTIONS,
     );
-
-    return { message: result.message };
+    return {
+      message: result.message,
+      access_token: result.tokens.accessToken,
+      refresh_token: result.tokens.refreshToken,
+    };
   }
 
   @Post('logout')

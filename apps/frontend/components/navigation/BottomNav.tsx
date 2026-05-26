@@ -9,8 +9,8 @@ const NAV_ITEMS = [
     label: 'Home',
     icon: (a: boolean) => (
       <svg
-        width="22"
-        height="22"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill={a ? 'var(--primary)' : 'none'}
         stroke={a ? 'var(--primary)' : 'var(--text-3)'}
@@ -28,8 +28,8 @@ const NAV_ITEMS = [
     label: 'Workouts',
     icon: (a: boolean) => (
       <svg
-        width="22"
-        height="22"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke={a ? 'var(--primary)' : 'var(--text-3)'}
@@ -46,8 +46,8 @@ const NAV_ITEMS = [
     label: 'Exercises',
     icon: (a: boolean) => (
       <svg
-        width="22"
-        height="22"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke={a ? 'var(--primary)' : 'var(--text-3)'}
@@ -62,12 +62,30 @@ const NAV_ITEMS = [
     ),
   },
   {
+    href: '/progress',
+    label: 'Progress',
+    icon: (a: boolean) => (
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={a ? 'var(--primary)' : 'var(--text-3)'}
+        strokeWidth={a ? 2.2 : 1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+    ),
+  },
+  {
     href: '/habits',
     label: 'Habits',
     icon: (a: boolean) => (
       <svg
-        width="22"
-        height="22"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke={a ? 'var(--primary)' : 'var(--text-3)'}
@@ -85,8 +103,8 @@ const NAV_ITEMS = [
     label: 'Settings',
     icon: (a: boolean) => (
       <svg
-        width="22"
-        height="22"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke={a ? 'var(--primary)' : 'var(--text-3)'}
@@ -112,7 +130,7 @@ export default function BottomNav() {
         backdropFilter: 'blur(20px)',
       }}
     >
-      <div className="flex items-center justify-around px-1 py-2 max-w-lg mx-auto">
+      <div className="flex items-center justify-around px-0.5 py-1.5 max-w-lg mx-auto">
         {NAV_ITEMS.map((item) => {
           const active =
             pathname === item.href ||
@@ -121,12 +139,12 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-0"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all min-w-0"
               style={{ color: active ? 'var(--primary)' : 'var(--text-3)' }}
             >
               {item.icon(active)}
               <span
-                className="text-[10px] font-semibold tracking-wide"
+                className="text-[9px] font-semibold tracking-wide"
                 style={{ color: active ? 'var(--primary)' : 'var(--text-3)' }}
               >
                 {item.label}
